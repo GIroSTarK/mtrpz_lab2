@@ -3,6 +3,13 @@ import path from 'path';
 
 const filePath = process.argv[2];
 const outputFlag = process.argv.indexOf('--out');
+let formatFlag;
+process.argv.forEach((arg) => {
+  if (arg.includes('--format')) {
+    formatFlag = arg.split('=')[1];
+  }
+});
+
 if (!filePath) {
   throw new Error('No file path provided');
 }
@@ -38,7 +45,11 @@ function convert(regex, marker, tag, ansiCode) {
           }
           parts[i] = parts[i].replace(
             part,
-            outputFlag !== -1
+            formatFlag === 'html'
+              ? `<${tag}>${content}</${tag}>`
+              : formatFlag === 'ansi'
+              ? `${ansiCode}${content}\x1b[0m`
+              : !formatFlag && outputFlag !== -1
               ? `<${tag}>${content}</${tag}>`
               : `${ansiCode}${content}\x1b[0m`
           );
@@ -58,7 +69,11 @@ for (let i = 0; i < parts.length; i++) {
       const paragraphs = parts[i].split(markers[3]);
       for (let j = 0; j < paragraphs.length; j++) {
         paragraphs[j] =
-          outputFlag !== -1
+          formatFlag === 'html'
+            ? `<p>${paragraphs[j].trim()}</p>`
+            : formatFlag === 'ansi'
+            ? `${paragraphs[j].trim()}\n`
+            : !formatFlag && outputFlag !== -1
             ? `<p>${paragraphs[j].trim()}</p>`
             : `${paragraphs[j].trim()}\n`;
       }
