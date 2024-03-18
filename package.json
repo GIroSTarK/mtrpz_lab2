@@ -1,7 +1,7 @@
 {
   "name": "html-parser",
   "version": "1.0.0",
-  "description": "A program that can convert md syntax to html",
+  "description": "A program that can convert md syntax to html and ansi format",
   "main": "index.js",
   "type": "module",
   "scripts": {
