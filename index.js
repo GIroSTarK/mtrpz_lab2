@@ -5,7 +5,10 @@ import os from 'node:os';
 const filePath = process.argv[2];
 const outputFlag = process.argv.indexOf('--out');
 const formatFlag = process.argv.indexOf('--format');
-const format = process.argv[formatFlag + 1];
+let format = 'noFormat';
+if (formatFlag !== -1) {
+  format = process.argv[formatFlag + 1];
+}
 
 if (!filePath) {
   throw new Error('No file path provided');
@@ -37,17 +40,17 @@ const setParagraphs = (text, format) => {
         return `<p>${par.trim()}</p>${os.EOL}`;
       } else {
         return par.trim() + os.EOL;
-      }    
+      }
     });
 
   return paragraphs.join('');
 };
 
 const setPreformattedParts = (text, format) => {
-  if (!text.startsWith('\n')) {
+  if (!text.startsWith(`${os.EOL}`)) {
     throw new Error('Should be line break after preformatted marker');
   }
-  if (!text.endsWith('\n')) {
+  if (!text.endsWith(`${os.EOL}`)) {
     throw new Error('Should be line break before last preformatted marker');
   }
 
@@ -167,16 +170,10 @@ const handleFormat = (
   }
 };
 
-switch (format) {
-  case 'html':
-    handleFormat(markdownToHTML, markdownToHTML);
-    break;
+const formatFuncs = {
+  html: handleFormat.bind(null, markdownToHTML, markdownToHTML),
+  ansi: handleFormat.bind(null, markdownToAnsi, markdownToAnsi),
+  noFormat: handleFormat,
+};
 
-  case 'ansi':
-    handleFormat(markdownToAnsi, markdownToAnsi);
-    break;
-
-  default:
-    handleFormat();
-    break;
-}
+formatFuncs[format]();
