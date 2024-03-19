@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'node:os';
 
 const filePath = process.argv[2];
 const outputFlag = process.argv.indexOf('--out');
@@ -33,13 +32,13 @@ const md = await fs.readFile(filePath, 'utf-8');
 
 const setParagraphs = (text, format) => {
   const paragraphs = text
-    .split(`${os.EOL}${os.EOL}`)
+    .split('\n\n')
     .filter((par) => par.trim() !== '')
     .map((par) => {
       if (format === 'html') {
-        return `<p>${par.trim()}</p>${os.EOL}`;
+        return `<p>${par.trim()}</p>\n`;
       } else {
-        return par.trim() + os.EOL;
+        return par.trim() + '\n';
       }
     });
 
@@ -47,17 +46,17 @@ const setParagraphs = (text, format) => {
 };
 
 const setPreformattedParts = (text, format) => {
-  if (!text.startsWith(`${os.EOL}`)) {
+  if (!text.startsWith('\n')) {
     throw new Error('Should be line break after preformatted marker');
   }
-  if (!text.endsWith(`${os.EOL}`)) {
+  if (!text.endsWith('\n')) {
     throw new Error('Should be line break before last preformatted marker');
   }
 
   if (format === 'html') {
-    return `<pre>${text}</pre>${os.EOL}`;
+    return `<pre>${text}</pre>\n`;
   } else {
-    return text.trim() + os.EOL;
+    return text.trim() + '\n';
   }
 };
 
