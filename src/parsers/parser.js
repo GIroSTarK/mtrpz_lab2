@@ -40,8 +40,6 @@ export const setPreformattedParts = (text, format) => {
 
   if (format === 'html') {
     return `<pre>${text}</pre>\n`;
-  } else {
-    return text.trim() + '\n';
   }
 };
 
