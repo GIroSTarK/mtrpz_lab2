@@ -4,20 +4,16 @@ import {
 } from '../errorHandlers/errorHandlers.js';
 
 export const markers = ['**', '_', '`'];
-
-const boldRegex =
-  /(?<=[ ,.:;\n\t]|^)\*\*(?=\S)(.+?)(?<=\S)\*\*(?=[ ,.:;\n\t]|$)/g;
-const italicRegex = /(?<=[ ,.:;\n\t]|^)_(?=\S)(.+?)(?<=\S)_(?=[ ,.:;\n\t]|$)/g;
-const monospacedRegex =
-  /(?<=[ ,.:;\n\t]|^)`(?=\S)(.+?)(?=\S)`(?=[ ,.:;\n\t]|$)/g;
-const regexps = [boldRegex, italicRegex, monospacedRegex];
-
-const leftBold = /(?<=[ ,.:;\n\t]|^)\*\*(?=\S)/g;
-const rightBold = /(?<=\S)\*\*(?=[ ,.:;\n\t]|$)/g;
-const leftItalic = /(?<=[ ,.:;\n\t]|^)_(?=\S)/g;
-const rightItalic = /(?<=\S)_(?=[ ,.:;\n\t]|$)/g;
-const leftMonospaced = /(?<=[ ,.:;\n\t]|^)`(?=\S)/g;
-const rightMonospaced = /(?=\S)`(?=[ ,.:;\n\t]|$)/g;
+export const mainRegexps = [
+  /(?<=[ ,.:;\n\t]|^)\*\*(?=\S)(.+?)(?<=\S)\*\*(?=[ ,.:;\n\t]|$)/g,
+  /(?<=[ ,.:;\n\t]|^)_(?=\S)(.+?)(?<=\S)_(?=[ ,.:;\n\t]|$)/g,
+  /(?<=[ ,.:;\n\t]|^)`(?=\S)(.+?)(?=\S)`(?=[ ,.:;\n\t]|$)/g,
+];
+export const sideRegexps = [
+  [/(?<=[ ,.:;\n\t]|^)\*\*(?=\S)/g, /(?<=\S)\*\*(?=[ ,.:;\n\t]|$)/g],
+  [/(?<=[ ,.:;\n\t]|^)_(?=\S)/g, /(?<=\S)_(?=[ ,.:;\n\t]|$)/g],
+  [/(?<=[ ,.:;\n\t]|^)`(?=\S)/g, /(?=\S)`(?=[ ,.:;\n\t]|$)/g],
+];
 
 export const setParagraphs = (text, format) => {
   const paragraphs = text
@@ -50,6 +46,7 @@ export const setPreformattedParts = (text, format) => {
 };
 
 export const setHtmlTags = (text) => {
+  const [boldRegex, italicRegex, monospacedRegex] = mainRegexps;
   return text
     .replace(boldRegex, '<b>$1</b>')
     .replace(italicRegex, '<i>$1</i>')
@@ -57,6 +54,7 @@ export const setHtmlTags = (text) => {
 };
 
 export const setAnsiSequences = (text) => {
+  const [boldRegex, italicRegex, monospacedRegex] = mainRegexps;
   return text
     .replace(boldRegex, '\x1b[1m$1\x1b[0m')
     .replace(italicRegex, '\x1b[3m$1\x1b[0m')
@@ -64,6 +62,11 @@ export const setAnsiSequences = (text) => {
 };
 
 export const formatMarkdown = (md, setFormat, format) => {
+  const [boldRegex, italicRegex, monospacedRegex] = mainRegexps;
+  const [leftBold, rightBold] = sideRegexps[0];
+  const [leftItalic, rightItalic] = sideRegexps[1];
+  const [leftMonospaced, rightMonospaced] = sideRegexps[2];
+
   return () => {
     const parts = md.split('```');
     if (parts.length % 2 === 0) {
@@ -80,7 +83,7 @@ export const formatMarkdown = (md, setFormat, format) => {
           rightMonospaced,
           monospacedRegex
         );
-        regexps.forEach((regex, index) =>
+        mainRegexps.forEach((regex, index) =>
           nestedMarkersChecker(parts[i], regex, markers[index])
         );
         parts[i] = setFormat(parts[i]);
